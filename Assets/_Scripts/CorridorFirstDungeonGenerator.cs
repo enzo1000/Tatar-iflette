@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+//Script en charge de creer des Dungeons composes de Salles (une salle est generee comme dans le
+// script SimpleRandomWalkDungeonGenerator)
 public class CorridorFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
 {
     [SerializeField]

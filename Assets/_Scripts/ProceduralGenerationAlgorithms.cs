@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-//Will contain all the procedural generation algorithms accessible for all other classes
+//Contient toutes les fonctions de generation procedurale accessible pour toute les classes
 public static class ProceduralGenerationAlgotithms
 {
     //On renvoie un HashSet pour supprimer plus simplement les doublons (étant donnée que RandomWalk est aléatoire)
@@ -45,39 +45,45 @@ public static class ProceduralGenerationAlgotithms
         return corridor;
     }
 
-    // BoundsInt sont des structures représentant des bounding box en 3D, plus d'info sur la doc Unity (AABB)
+    //BoundsInt est une structure représentant une bounding box en 3D, plus d'info sur la doc Unity (AABB)
+    //Fonction servant a decouper un espace en plusieurs boite 
     public static List<BoundsInt> BinarySpacePartitioning(BoundsInt spaceToSplit, int minWidth, int minHeight)
     {
         Queue<BoundsInt> roomsQueue = new Queue<BoundsInt>();
         List<BoundsInt> roomsList = new List<BoundsInt>();
 
+        //Les autres roomsQueue.Enqueue se font dans les fonctions SplitHorizontally et SplitVertically
         roomsQueue.Enqueue(spaceToSplit);
         while(roomsQueue.Count > 0)
         {
             BoundsInt room = roomsQueue.Dequeue();
 
-            //If our room is large enough
+            //Si notre piece peut encore etre decoupee
             if (room.size.y >= minHeight && room.size.x >= minWidth)
             {
+                //Genere une valeur aleatoire entre 0.0f et 1.0f
                 if (Random.value < 0.5f)
                 {
-                    //Verification to check if our romm is large enough to be split
+                    //Verification de la possibilite de split l'espace en deux
+                    // Verification Horizontale
                     if(room.size.y >= minHeight * 2)
                     {
                         SplitHorizontally(minHeight, roomsQueue, room);
                     }
+                    // Verification Verticale
                     else if (room.size.x >= minWidth * 2)
                     {
                         SplitVertically(minWidth, roomsQueue, room);
                     }
+                    // Sinon, on ajoute la room tel quelle
                     else if (room.size.x >= minWidth && room.size.y > minHeight)
                     {
                         roomsList.Add(room);
                     }
                 }
+                //Idem que pour la partie au dessus mais cette fois avec une inversion de l'ordre de split
                 else
                 {
-                    //Verification to check if our romm is large enough to be split
                     if (room.size.x >= minWidth * 2)
                     {
                         SplitVertically(minWidth, roomsQueue, room);
@@ -96,6 +102,7 @@ public static class ProceduralGenerationAlgotithms
         return roomsList;
     }
 
+    //Fonction de decoupage de l'espace verticale
     private static void SplitVertically(int minWidth, Queue<BoundsInt> roomsQueue, BoundsInt room)
     {
         var xSplit = Random.Range(1, room.size.x);
@@ -108,6 +115,7 @@ public static class ProceduralGenerationAlgotithms
         roomsQueue.Enqueue(room2);
     }
 
+    //Fonction de decoupage de l'espace horizontale
     private static void SplitHorizontally(int minHeight, Queue<BoundsInt> roomsQueue, BoundsInt room)
     {
         var ySplit = Random.Range(1, room.size.y);
@@ -120,6 +128,7 @@ public static class ProceduralGenerationAlgotithms
     }
 }
 
+//Classe definissant les direction dans un espace 2D
 public static class Direction2D
 {
     public static List<Vector2Int> cardinalDirectionsList = new List<Vector2Int>
@@ -150,6 +159,7 @@ public static class Direction2D
         new Vector2Int(-1, 1)   //LEFT - UP
     };
 
+    //Fonction qui renvoi une direction aleatoire (UP, RIGHT, DOWN ou LEFT)
     public static Vector2Int GetRandomCardinalDirection()
     {
         return cardinalDirectionsList[Random.Range(0, cardinalDirectionsList.Count)];

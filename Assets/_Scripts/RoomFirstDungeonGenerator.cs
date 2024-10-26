@@ -4,11 +4,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+//Script en charge de creer des Dungeons composes de pieces (une piece est une carre / rectangle)
+// Herite de Simple Random Walk Dungeon Generator
 public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
 {
+    //Defini la taille minimale d'une salle
     [SerializeField]
     private int minRoomWidth = 4, minRoomHeight = 4;
 
+    //Defini une taille approximative pour le Dungeon
     [SerializeField]
     private int dungeonWidth = 20, dungeonHeight = 20;
 
@@ -16,7 +20,7 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
     [Range(0, 10)]
     private int offset = 1;
 
-    // Afin de choisir si on veut générer des salles aléatoires avec l'algorithme de RandomWalk ou de BoundingBox
+    //Si on veut utiliser l'agorithme de RandomWalk / BoundingBox
     [SerializeField]
     private bool randomWalkRooms = false;
 
@@ -25,14 +29,19 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         CreateRooms();
     }
 
+    //Fonction regroupant toutes les fonctions necessaire a la creation de notre dongeon precedural
     private void CreateRooms()
     {
+        //On envoi a l'algo de generation procedurale de piece un espace a decouper de taille "startPosition" -> "dungeonWidth, dungeonHeight"
         var roomsList = ProceduralGenerationAlgotithms.BinarySpacePartitioning(
-            new BoundsInt((Vector3Int) startPosition, new Vector3Int(dungeonWidth, dungeonHeight, 0)), 
-            minRoomWidth, minRoomHeight);
+            new BoundsInt((Vector3Int) startPosition,
+            new Vector3Int(dungeonWidth, dungeonHeight, 0)), 
+            minRoomWidth, 
+            minRoomHeight);
 
         HashSet<Vector2Int> floor = new HashSet<Vector2Int>();
 
+        //Choix de l'algo pour la creation du Dungeon RandomWalk / BoundingBox
         if(randomWalkRooms)
         {
             floor = CreateRoomsRandomly(roomsList);
@@ -42,19 +51,25 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
             floor = CreateSimpleRooms(roomsList);
         }
 
+        //On vient stocker le centre de chaques piece dans une liste
         List<Vector2Int> roomCenters = new List<Vector2Int>();
         foreach (BoundsInt room in roomsList)
         {
             roomCenters.Add((Vector2Int) Vector3Int.RoundToInt(room.center));
         }
 
+        //Connexion des pieces (centre) par des couloirs
         HashSet<Vector2Int> corridors = ConnectRooms(roomCenters);
+
+        //Union des listes de sol et de couloir pour la generation de mur
         floor.UnionWith(corridors);
 
+        //Tiling des cases + generation des murs
         tilemapVisualizer.PaintFloorTiles(floor);
         WallGenerator.CreateWalls(floor, tilemapVisualizer);
     }
 
+    //Premiere fonction de generation procedurale (randomWalkRooms == True)
     //Remplis les salles d'une manière plus organique tout en respectant les contraintes de la room
     private HashSet<Vector2Int> CreateRoomsRandomly(List<BoundsInt> roomsList)
     {
@@ -102,6 +117,7 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         return corridors;
     }
 
+    //Creer les couloirs entre les pieces
     private HashSet<Vector2Int> CreateCorridor(Vector2Int currentRoomCenter, Vector2Int destination)
     {
         HashSet<Vector2Int> corridor = new HashSet<Vector2Int>();
@@ -134,7 +150,7 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         return corridor;
     }
 
-    //Cette méthode a pour but de trouver la salle la plus proche à notre salle actuelle (de part son centre)
+    //Trouve la salle la plus proche à notre pieces actuelle en fonction du centre des salles
     private Vector2Int FindClosestPointTo(Vector2Int currentRoomCenter, List<Vector2Int> roomCenters)
     {
         Vector2Int closest = Vector2Int.zero;
@@ -151,6 +167,8 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         return closest;
     }
 
+    //Deuxieme fonction de generation procedurale (randomWalkRooms == False)
+    //Creer le Tiling pour notre Dungeon d'une maniere tres basique (rectangle)
     private HashSet<Vector2Int> CreateSimpleRooms(List<BoundsInt> roomsList)
     {
         HashSet<Vector2Int> floor = new HashSet<Vector2Int>();

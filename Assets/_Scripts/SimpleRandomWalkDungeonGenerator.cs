@@ -1,8 +1,11 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+//Script en charge de creer des Salles pour notre donjon (une salle est generer aleatoirement avec une 
+// position de depart puis un algorithme de selection aleatoire de ses voisins afin de colorer le sol de la salle)
+
+//Herite de Abstract Dungeon Generator (un design pattern d'ont on pourrait se passer ?)
 public class SimpleRandomWalkDungeonGenerator : AbstractDungeonGenerator
 {
     [SerializeField]

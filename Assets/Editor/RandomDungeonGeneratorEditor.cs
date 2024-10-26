@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-// Custom editor for AbstractDungeonGenerator
-// a custom editor is used to modify the inspector view of a script
+//Editeur custom pour AbstractDungeonGenerator
+// sert a autoriser la modification de la view depuis l'inspector (bouton "Generate Dungeon")
 [CustomEditor(typeof(AbstractDungeonGenerator), true)]
 public class RandomDungeonGeneratorEditor : Editor
 {
